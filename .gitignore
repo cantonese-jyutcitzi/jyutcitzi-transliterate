@@ -1,0 +1,28 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments (local runs beside the service venv)
+.venv/
+venv/
+ENV/
+env/
+
+# Packaging / tooling caches
+build/
+dist/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# CLI output and scratch input (see README; not source)
+out.txt
+text.txt
+
+# OS / editor
+.DS_Store
+*.swp
+*~

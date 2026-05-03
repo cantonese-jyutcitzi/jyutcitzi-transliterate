@@ -41,7 +41,7 @@ In order to render the Jyutcitzi glyphs when using the font mode, install the fo
 ```
 usage: transliterate.py [-h] [-m MODE] [-s STYLE] [-r R] [-v V] [-t DIRECTION]
                         [--use_repeat_char BOOL] [--use_schwa_char BOOL]
-                        [-a ALGORITHM] [-x BOOL]
+                        [-a ALGORITHM] [-x BOOL] [--legacy-web-dots]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -65,6 +65,9 @@ optional arguments:
   -x BOOL, --sep_eng_words BOOL
                         whether to add whitespace between English words in the
                         output
+  --legacy-web-dots     in web mode only, restore legacy U+00B7 middle dots after
+                        syllabic nasals, zero-tone nuclei, and suffix onsets (default:
+                        no middle dots in web output)
 ```
 
 The most often used command for me is

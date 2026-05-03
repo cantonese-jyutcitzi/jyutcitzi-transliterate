@@ -192,13 +192,14 @@ def factorize(syllable, replace_r=True):
   is_syllabic = onset in {'m', 'ng'} and final == '' and suffix == ''
   return onset, final, suffix, tone, is_syllabic
 
-def assemble(jping_tup, mode='font'):
+def assemble(jping_tup, mode='font', legacy_web_dots=False):
   assert mode in ['web','font']
   onset, final, suffix, tone, is_syllabic = jping_tup
+  dot = "·" if legacy_web_dots else ""
   if is_syllabic:
     thing = onset + "`" + tones[tone]
     if mode == 'web':
-      return syllabics[onset] + tones[tone] + ("·" if tone in {"", None} else "")
+      return syllabics[onset] + tones[tone] + (dot if tone in {"", None} else "")
     elif mode == 'font':
       return hex_dict[thing]
   else:
@@ -216,8 +217,8 @@ def assemble(jping_tup, mode='font'):
         ("`" if len(suffix) == 1 else "")
 
     if mode == 'web':
-      return thing + ("·" if tone in {"", None} else "") \
-        + (suffix_thing + "·" if suffix != "" else "")
+      return thing + (dot if tone in {"", None} else "") \
+        + (suffix_thing + dot if suffix != "" else "")
     elif mode == 'font':
       return hex_dict[thing] + (hex_dict[suffix_thing] if suffix_thing != "" else "")
 
@@ -282,7 +283,8 @@ def tojyutping_converter(input, cur_cmu, orthography='honzi_jcz', sep_eng_words=
 
 def transliterate(input, mode='font', orthography='honzi_jcz', use_repeat_char=False,
                   initial_r_block="r", v_block="v", tone_config='horizontal',
-                  use_schwa_char=False, algorithm="PyCantonese", sep_eng_words=True):
+                  use_schwa_char=False, algorithm="PyCantonese", sep_eng_words=True,
+                  legacy_web_dots=False):
   assert mode in {'font', 'web'}
   assert orthography in {'jcz_only', 'honzi_jcz'}
   assert initial_r_block in {'r', 'wl', 'w'}
@@ -325,7 +327,8 @@ def transliterate(input, mode='font', orthography='honzi_jcz', use_repeat_char=F
   for out in outs:
     if is_alphanum(out) and out.islower() and out not in unparsed:
       try:
-        outs_neo.append(assemble(factorize(out), mode=mode))
+        outs_neo.append(assemble(factorize(out), mode=mode,
+                                 legacy_web_dots=legacy_web_dots))
       except:
         outs_neo.append(out)
     else:
@@ -357,21 +360,23 @@ def transliterate(input, mode='font', orthography='honzi_jcz', use_repeat_char=F
 
 def file_transliterator(file, mode='font', orthography='honzi_jcz', use_repeat_char=False,
                   initial_r_block="r", v_block="v", tone_config='horizontal',
-                  use_schwa_char=False, algorithm="PyCantonese", sep_eng_words=True):
+                  use_schwa_char=False, algorithm="PyCantonese", sep_eng_words=True,
+                  legacy_web_dots=False):
     with open(args.file, 'r') as f:
         return transliterate(f.read(), mode, orthography, use_repeat_char,
                           initial_r_block, v_block, tone_config, use_schwa_char,
-                          algorithm, sep_eng_words)
+                          algorithm, sep_eng_words, legacy_web_dots)
 
     return "Error: couldn't read " + file
 
 def pipe_transliterator(input, file=None, mode='font', orthography='honzi_jcz',
                   use_repeat_char=False, initial_r_block="r", v_block="v",
                   tone_config='horizontal', use_schwa_char=False,
-                  algorithm="PyCantonese", sep_eng_words=True):
+                  algorithm="PyCantonese", sep_eng_words=True,
+                  legacy_web_dots=False):
     return transliterate(input, mode, orthography, use_repeat_char,
                       initial_r_block, v_block, tone_config, use_schwa_char,
-                      algorithm, sep_eng_words)
+                      algorithm, sep_eng_words, legacy_web_dots)
 
 ## code for running command
 from argparse import ArgumentParser
@@ -400,6 +405,9 @@ if __name__ == '__main__':
                         metavar="ALGORITHM", default='PyCantonese')
     parser.add_argument("-x","--sep_eng_words", dest="sep_eng_words",
                         help="whether to add whitespace between English words in the output", metavar='BOOL', type=bool, default=True)
+    parser.add_argument("--legacy-web-dots", dest="legacy_web_dots",
+                        action="store_true",
+                        help="in web mode, insert U+00B7 middle dots after syllabic nasals, zero-tone nuclei, and suffix onsets (legacy output; default is no dots)")
 
     args = parser.parse_args()
     if not sys.stdin.isatty():
